@@ -1,4 +1,5 @@
 import os
+import sys
 
 class Liste:
     def __init__(self, directory='.'):
@@ -9,7 +10,10 @@ class Liste:
             print(entry)
 
 if __name__ == "__main__":
-    directory_to_list = '.' 
+    if len(sys.argv) > 1:
+        directory_to_list = sys.argv[1]
+    else:
+        print("Usage: python script.py <directory_path>")
+        sys.exit(1)
+
     Liste(directory_to_list).listele()
-
-
