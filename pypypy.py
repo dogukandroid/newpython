@@ -13,7 +13,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         directory_to_list = sys.argv[1]
     else:
-        print("Usage: python script.py <directory_path>")
+        print("Usage: python3 script.py <directory_path>")
         sys.exit(1)
 
     Liste(directory_to_list).listele()
+
+
