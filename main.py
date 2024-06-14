@@ -2,16 +2,20 @@
 #commonı ımport et
 #test fonksıyonlarını calıstır (buraya def ıle yaz)
 #sonra gel
+
+
+
+#value base64 bı deger orada bır json var nodeInfos/ oradakı nameyı oku bır tane parametre alsın fonksıyonum burada yazan namenın gectıgı her yerı bu parametre ıle degısıtr
 import sys
-import json
 from common import Common
 
 if __name__ == "__main__":
-    # Use the JSON file path provided as a command-line argument, or use 'releasekv.json' by default
+
+    json_file_path = 'test.json'
     if len(sys.argv) > 1:
         json_file_path = sys.argv[1]
-    else:
-        json_file_path = 'test.json'
+
+    print(f"Using JSON file: {json_file_path}")
 
     # Decode the base64 string
     from_base64 = "ZXhhbXBsZXNjcmlwdA=="
@@ -24,33 +28,27 @@ if __name__ == "__main__":
     print("Encoded string:", encoded_string)
     print("Re-decoded string:", Common.fromBase64(encoded_string))
 
-    # Read the JSON file
-    try:
-        read_data = Common.readJson(json_file_path)
-        print("Read data from JSON file:", read_data)
-    except FileNotFoundError:
-        print(f"File not found: {json_file_path}")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print(f"Invalid JSON format in file: {json_file_path}")
-        sys.exit(1)
-
-    # Append data to the JSON file
-    additional_data = {
-        "example_key": "example_value"
+    data_to_write = {
+        "name": "John Doe",
+        "age": 30
     }
-    
-    # Check if the JSON file contains a dictionary or a list
-    if isinstance(read_data, dict):
-        read_data.update(additional_data)
-    elif isinstance(read_data, list):
-        read_data.append(additional_data)
-    else:
-        print("Unsupported JSON structure")
-        sys.exit(1)
 
-    # Write the updated data back to the JSON file
-    Common.writeJson(json_file_path, read_data)
+    
+    if not Common.addDataToJson(json_file_path, data_to_write):
+        print("Initial data addition failed")
+
+
+    read_data = Common.readJson(json_file_path)
+    print("Read data from JSON file:", read_data)
+
+    # Additional data to add
+    additional_data = {
+        "occupation": "Software Engineer"
+    }
+
+    # Add more data to the JSON file
+    if not Common.addDataToJson(json_file_path, additional_data):
+        print("Additional data addition failed")
 
     # Read the updated data back from the JSON file
     updated_read_data = Common.readJson(json_file_path)
