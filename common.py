@@ -77,3 +77,33 @@ class Common:
         except Exception as e:
             print(f"Error adding data to JSON file: {e}")
             return False
+
+    @staticmethod
+    def decodeBase64InJson(data):
+        if isinstance(data, dict):
+            return {k: Common.decodeBase64InJson(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [Common.decodeBase64InJson(item) for item in data]
+        elif isinstance(data, str):
+            try:
+                # Attempt to decode the string; if it's not base64, it will fail and return the original string
+                return Common.fromBase64(data)
+            except (base64.binascii.Error, UnicodeDecodeError, ValueError):
+                return data
+        else:
+            return data
+
+    @staticmethod
+    def updateGateway(data, new_gateway_value):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if key.lower() == "gateway":
+                    data[key] = new_gateway_value
+                else:
+                    data[key] = Common.updateGateway(value, new_gateway_value)
+        elif isinstance(data, list):
+            data = [Common.updateGateway(item, new_gateway_value) for item in data]
+        return data
+
+
+
