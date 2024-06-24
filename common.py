@@ -2,6 +2,10 @@ import os
 import json
 import base64
 
+import os
+import json
+import base64
+
 class Common:
     def __init__(self, directory='.'):
         self.directory = directory
@@ -30,7 +34,7 @@ class Common:
     def readJson(filepath):
         try:
             with open(filepath, 'r') as file:
-                print(f"Reading from file: {filepath}")  # Debug print
+                print(f"Reading from file: {filepath}")
                 return json.load(file)
         except FileNotFoundError:
             print(f"File not found: {filepath}")
@@ -43,7 +47,7 @@ class Common:
     def writeJson(filepath, data):
         try:
             with open(filepath, 'w') as file:
-                print(f"Writing to file: {filepath}")  # Debug print
+                print(f"Writing to file: {filepath}")
                 json.dump(data, file, indent=4)
             return True
         except Exception as e:
@@ -55,9 +59,8 @@ class Common:
         try:
             existing_data = Common.readJson(filepath)
             if existing_data is None:
-                existing_data = {}  # If file does not exist or is empty, initialize with an empty dictionary
+                existing_data = {}
 
-            # Check if existing_data is a dictionary or list and update accordingly
             if isinstance(existing_data, dict):
                 if isinstance(new_data, dict):
                     existing_data.update(new_data)
@@ -86,7 +89,6 @@ class Common:
             return [Common.decodeBase64InJson(item) for item in data]
         elif isinstance(data, str):
             try:
-                # Attempt to decode the string; if it's not base64, it will fail and return the original string
                 return Common.fromBase64(data)
             except (base64.binascii.Error, UnicodeDecodeError, ValueError):
                 return data
@@ -98,12 +100,14 @@ class Common:
         if isinstance(data, dict):
             for key, value in data.items():
                 if key.lower() == "gateway":
+                    print(f"Updating key '{key}' from '{value}' to '{new_gateway_value}'")
                     data[key] = new_gateway_value
                 else:
                     data[key] = Common.updateGateway(value, new_gateway_value)
         elif isinstance(data, list):
             data = [Common.updateGateway(item, new_gateway_value) for item in data]
         return data
+
 
 
 
