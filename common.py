@@ -2,10 +2,6 @@ import os
 import json
 import base64
 
-import os
-import json
-import base64
-
 class Common:
     def __init__(self, directory='.'):
         self.directory = directory
@@ -29,6 +25,13 @@ class Common:
     def fromBase64(base64_string):
         decoded_bytes = base64.b64decode(base64_string)
         return decoded_bytes.decode('utf-8')
+
+    @staticmethod
+    def isBase64(s):
+        try:
+            return base64.b64encode(base64.b64decode(s)) == s.encode('utf-8')
+        except Exception:
+            return False
 
     @staticmethod
     def readJson(filepath):
@@ -55,39 +58,12 @@ class Common:
             return False
 
     @staticmethod
-    def addDataToJson(filepath, new_data):
-        try:
-            existing_data = Common.readJson(filepath)
-            if existing_data is None:
-                existing_data = {}
-
-            if isinstance(existing_data, dict):
-                if isinstance(new_data, dict):
-                    existing_data.update(new_data)
-                else:
-                    print("New data must be a dictionary to update existing dictionary.")
-                    return False
-            elif isinstance(existing_data, list):
-                if isinstance(new_data, list):
-                    existing_data.extend(new_data)
-                else:
-                    existing_data.append(new_data)
-            else:
-                print(f"Unsupported JSON structure in file: {filepath}")
-                return False
-
-            return Common.writeJson(filepath, existing_data)
-        except Exception as e:
-            print(f"Error adding data to JSON file: {e}")
-            return False
-
-    @staticmethod
     def decodeBase64InJson(data):
         if isinstance(data, dict):
             return {k: Common.decodeBase64InJson(v) for k, v in data.items()}
         elif isinstance(data, list):
             return [Common.decodeBase64InJson(item) for item in data]
-        elif isinstance(data, str):
+        elif isinstance(data, str) and Common.isBase64(data):
             try:
                 return Common.fromBase64(data)
             except (base64.binascii.Error, UnicodeDecodeError, ValueError):
@@ -108,6 +84,24 @@ class Common:
             data = [Common.updateGateway(item, new_gateway_value) for item in data]
         return data
 
-
-
-
+    @staticmethod
+    def processJsonWithBase64(json_data, new_gateway_value):
+        for item in json_data:
+            if isinstance(item, dict) and "value" in item:
+                value_str = item["value"]
+                if Common.isBase64(value_str):
+                    try:
+                        decoded_value = Common.fromBase64(value_str)
+                        nested_json = json.loads(decoded_value)
+                        updated_nested_json = Common.updateGateway(nested_json, new_gateway_value)
+                        item["value"] = Common.toBase64(json.dumps(updated_nested_json, indent=4))
+                    except json.JSONDecodeError:
+                        print(f"Failed to decode JSON in 'value': {value_str}")
+                else:
+                    try:
+                        nested_json = json.loads(value_str)
+                        updated_nested_json = Common.updateGateway(nested_json, new_gateway_value)
+                        item["value"] = json.dumps(updated_nested_json, indent=4)
+                    except json.JSONDecodeError:
+                        print(f"Failed to decode JSON in 'value': {value_str}")
+        return json_data
